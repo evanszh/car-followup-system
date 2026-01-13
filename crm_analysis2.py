@@ -12,14 +12,19 @@ import plotly.express as px
 def init_connection():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     try:
-        # 请确保 secrets 或 json 文件路径正确
-        creds = ServiceAccountCredentials.from_json_keyfile_name("glass-quest-482522-t7-977042a18a8b.json", scope)
+        # 💡 核心修改：不再读取文件，而是读取 Streamlit 的后台配置
+        if "gcp_service_account" in st.secrets:
+            creds_dict = st.secrets["gcp_service_account"]
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        else:
+            # 这行是为了让你在本地测试时依然能用
+            creds = ServiceAccountCredentials.from_json_keyfile_name("glass-quest-482522-t7-977042a18a8b.json", scope)
+            
         client = gspread.authorize(creds)
         return client.open("中国市场回访表").get_worksheet(0)
     except Exception as e:
         st.error(f"❌ 数据库连接失败: {e}")
         return None
-
 @st.cache_data(ttl=600)
 def load_data_cached(_sheet):
     if _sheet is None: return pd.DataFrame()
@@ -236,4 +241,5 @@ if not df.empty:
             else:
                 status.update(label="ℹ️ 未检测到新勾选", state="complete")
 else:
+
     st.error("无法读取数据，请检查 Google Sheets 是否包含正确表头：姓名, 购车日期, 生日, 对应销售, 购车回访_3天, 购车回访_15天, 购车回访_30天, 生日回访标记")
