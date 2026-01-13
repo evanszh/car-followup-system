@@ -110,7 +110,13 @@ st.markdown("""
 # ==========================================
 gsheet = init_connection()
 df = load_data_cached(gsheet)
-
+st.subheader("🔍 系统调试信息")
+st.write("1. 成功连接到的表名:", gsheet.title if gsheet else "连接失败")
+st.write("2. 读取到的表头 (列名):", df.columns.tolist())
+st.write("3. 数据总行数:", len(df))
+if not df.empty:
+    st.write("4. 第一行数据预览:", df.iloc[0].to_dict())
+st.divider()
 if not df.empty:
     today = pd.to_datetime(datetime.now().date())
 
@@ -243,3 +249,4 @@ if not df.empty:
 else:
 
     st.error("无法读取数据，请检查 Google Sheets 是否包含正确表头：姓名, 购车日期, 生日, 对应销售, 购车回访_3天, 购车回访_15天, 购车回访_30天, 生日回访标记")
+
