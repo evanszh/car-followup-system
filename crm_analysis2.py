@@ -12,19 +12,17 @@ st.set_page_config(page_title="回访工作台", layout="wide", page_icon="🚗"
 
 st.markdown("""
     <style>
-    /* --- 全局字体与配色优化 --- */
+    /* --- 全局背景 --- */
     .stApp {
         background-color: #f8f9fa;
     }
     
-    /* --- 表格样式优化 --- */
-    /* 表头背景色 */
+    /* --- 表格样式 --- */
     div[data-testid="stDataFrame"] th {
         background-color: #f1f3f5 !important;
         color: #495057 !important;
         font-weight: 600 !important;
     }
-    /* 增大行高，适配手指点击 */
     div[data-testid="stDataFrame"] td { 
         padding: 12px 15px !important; 
         height: 55px !important; 
@@ -32,60 +30,56 @@ st.markdown("""
         font-size: 15px;
     }
     
-    /* --- 指标卡片 (Metric) --- */
-    [data-testid="stMetric"] { 
-        background-color: #ffffff; 
-        border: 1px solid #e9ecef;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
-        padding: 15px; 
-        border-radius: 12px; 
-        transition: transform 0.2s;
+    /* --- 侧边栏刷新按钮 (次要按钮) 样式 --- */
+    /* 恢复为简约白底，避免太抢眼 */
+    section[data-testid="stSidebar"] button {
+        background-color: #ffffff !important;
+        color: #495057 !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s;
     }
-    [data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    section[data-testid="stSidebar"] button:hover {
+        border-color: #1D976C !important;
+        color: #1D976C !important;
+        background-color: #f8f9fa !important;
     }
-    
-    /* --- 底部保存按钮深度美化 (重点) --- */
-    .sync-container {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999;
-        width: 90%;
-        max-width: 600px;
-    }
-    
-    /* 定制 Streamlit 按钮样式 */
-    div.stButton > button {
+
+    /* --- 底部保存按钮 (主要按钮) 样式 --- */
+    /* 现在的颜色：极光绿 (Aurora Green) - 稳重且代表“通过/保存” */
+    .bottom-zone button {
         width: 100%;
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%); /* 现代渐变蓝 */
+        /* 这里的渐变色：从深翠绿(#1D976C) 到 清新绿(#93F9B9) */
+        background: linear-gradient(135deg, #1D976C 0%, #48c6ef 100%) !important; 
+        /* 或者尝试更商务的深海蓝，如下行所示 (如果不喜欢绿色，取消下行注释) */
+        /* background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%) !important; */
+        
         color: white !important;
-        border: none;
-        padding: 12px 24px;
+        border: none !important;
+        padding: 14px 24px !important;
         font-size: 18px !important;
         font-weight: 600 !important;
-        border-radius: 50px !important; /* 圆角胶囊样式 */
-        box-shadow: 0 10px 20px rgba(0, 97, 242, 0.3);
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        letter-spacing: 1px;
+        border-radius: 50px !important;
+        box-shadow: 0 8px 15px rgba(29, 151, 108, 0.2) !important;
+        letter-spacing: 1px !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     }
     
-    /* 按钮悬停效果 */
-    div.stButton > button:hover {
-        transform: translateY(-2px) scale(1.01);
-        box-shadow: 0 14px 28px rgba(0, 97, 242, 0.4);
-        background: linear-gradient(135deg, #0056d6 0%, #00b3e3 100%);
+    /* 底部按钮悬停效果 */
+    .bottom-zone button:hover {
+        transform: translateY(-3px) scale(1.01) !important;
+        box-shadow: 0 12px 25px rgba(29, 151, 108, 0.35) !important;
+        filter: brightness(1.05) !important;
     }
     
-    /* 按钮点击效果 */
-    div.stButton > button:active {
-        transform: translateY(1px);
-        box-shadow: 0 5px 10px rgba(0, 97, 242, 0.3);
+    /* 底部按钮点击效果 */
+    .bottom-zone button:active {
+        transform: translateY(1px) !important;
+        box-shadow: 0 4px 8px rgba(29, 151, 108, 0.2) !important;
     }
     
-    /* 底部区域背景装饰 */
+    /* 底部区域容器 */
     .bottom-zone {
         background-color: white;
         padding: 30px;
@@ -95,6 +89,15 @@ st.markdown("""
         margin-top: 40px;
         margin-bottom: 20px;
         text-align: center;
+    }
+
+    /* --- 指标卡片优化 --- */
+    [data-testid="stMetric"] { 
+        background-color: #ffffff; 
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+        padding: 15px; 
+        border-radius: 12px; 
     }
     </style>
     """, unsafe_allow_html=True)
@@ -152,6 +155,8 @@ if not df.empty:
             sel_rep = "全部"
         
         st.markdown("---")
+        # 这个按钮会自动应用上面定义的 section[data-testid="stSidebar"] button 样式
+        # 也就是简约白色样式
         if st.button("🔄 刷新最新数据", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
@@ -195,7 +200,6 @@ if not df.empty:
     st.title("🚀 客户回访控制台")
     st.caption(f"当前日期: {today.strftime('%Y-%m-%d')} | 操作员: {sel_rep}")
     
-    # 指标卡片
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("📅 首次回访", f"{len(l3)}人", help="3-8天")
     col2.metric("🚗 二次回访", f"{len(l15)}人", help="15-20天")
@@ -205,32 +209,31 @@ if not df.empty:
 
     st.markdown("---")
 
-    # 分页显示
     t1, t2, t3 = st.tabs(["📋 节点回访任务", "🎂 生日关怀任务", "⚠️ 逾期警报"])
     
     hide_cfg = {"_row_idx": None}
 
     with t1:
-        st.info("💡 提示：勾选右侧方框代表【已完成】，别忘了点击底部的蓝色大按钮保存哦！")
+        st.info("💡 提示：勾选右侧方框代表【已完成】，别忘了点击底部的绿色大按钮保存哦！")
         
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown("### 1️⃣ 首次回访")
             st.caption("购车后 3-8 天")
             e3 = st.data_editor(l3[['姓名', '对应销售', '购车回访_3天', '_row_idx']], 
-                key="e3", disabled=["姓名", "对应销售", "_row_idx"], column_config=hide_cfg, use_container_width=True, hide_index=True)
+                key="e3", disabled=["姓名", '对应销售', "_row_idx"], column_config=hide_cfg, use_container_width=True, hide_index=True)
         
         with c2:
             st.markdown("### 2️⃣ 二次回访")
             st.caption("购车后 15-20 天")
             e15 = st.data_editor(l15[['姓名', '对应销售', '购车回访_15天', '_row_idx']], 
-                key="e15", disabled=["姓名", "对应销售", "_row_idx"], column_config=hide_cfg, use_container_width=True, hide_index=True)
+                key="e15", disabled=["姓名", '对应销售', "_row_idx"], column_config=hide_cfg, use_container_width=True, hide_index=True)
         
         with c3:
             st.markdown("### 3️⃣ 周年回访")
             st.caption("购车满 1 年")
             e360 = st.data_editor(l360[['姓名', '对应销售', '购车回访_30天', '_row_idx']], 
-                key="e360", disabled=["姓名", "对应销售", "_row_idx"], 
+                key="e360", disabled=["姓名", '对应销售', "_row_idx"], 
                 column_config={"_row_idx": None, "购车回访_30天": st.column_config.CheckboxColumn("标记完成")}, 
                 use_container_width=True, hide_index=True)
 
@@ -242,7 +245,7 @@ if not df.empty:
         
         ebd = st.data_editor(
             lbd_display[['姓名', '对应销售', '生日日期', '倒计时', '生日回访标记', '_row_idx']], 
-            key="ebd", disabled=["姓名", "对应销售", "生日日期", "倒计时", "_row_idx"], 
+            key="ebd", disabled=["姓名", '对应销售', "生日日期", "倒计时", "_row_idx"], 
             column_config=hide_cfg, use_container_width=True, hide_index=True
         )
 
@@ -254,15 +257,16 @@ if not df.empty:
             st.dataframe(lov[['姓名', '对应销售', '原因', '购车日期', '生日']], use_container_width=True)
 
     # ==========================================
-    # 4. 底部保存区域 (UI 重点优化)
+    # 4. 底部保存区域 (美化)
     # ==========================================
-    st.markdown("<br><br>", unsafe_allow_html=True) # 占位符，防止内容被按钮遮挡
+    st.markdown("<br><br>", unsafe_allow_html=True) 
     
+    # 这里的 class="bottom-zone" 会触发 CSS 样式
     st.markdown('<div class="bottom-zone">', unsafe_allow_html=True)
     st.write("📝 完成上述勾选后，请点击下方按钮同步至数据库")
     
-    # 这是一个全宽的大按钮，样式由顶部的 CSS 控制
-    if st.button("💾 确认并同步所有更改 (Save Changes)", type="primary"):
+    # 这个按钮因为在 .bottom-zone 里面，会应用极光绿渐变样式
+    if st.button("💾 确认并同步所有更改 (Save Changes)"):
         with st.status("🚀 正在连接云端数据库...", expanded=True) as status:
             updates = []
             cols_to_sync = ['购车回访_3天', '购车回访_15天', '购车回访_30天', '生日回访标记']
@@ -277,20 +281,17 @@ if not df.empty:
                         cell_loc = gspread.utils.rowcol_to_a1(sheet_row, sheet_col)
                         updates.append({'range': cell_loc, 'values': [['TRUE']]})
 
-            st.write("正在汇总节点回访数据...")
             collect_updates(e3, '购车回访_3天')
             collect_updates(e15, '购车回访_15天')
             collect_updates(e360, '购车回访_30天')
-            st.write("正在汇总生日回访数据...")
             collect_updates(ebd, '生日回访标记')
             
             if updates:
                 try:
-                    st.write(f"正在写入 {len(updates)} 条更新记录...")
                     gsheet.batch_update(updates)
                     st.cache_data.clear()
                     status.update(label="✅ 同步成功！页面即将刷新...", state="complete")
-                    st.balloons() # 成功撒花特效
+                    st.balloons()
                     time.sleep(2)
                     st.rerun()
                 except Exception as e:
