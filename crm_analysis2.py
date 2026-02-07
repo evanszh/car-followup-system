@@ -182,10 +182,37 @@ if not df.empty:
     work_df['bday_diff'] = work_df['生日'].apply(get_days_to_bday)
 
     # --- 筛选任务 ---
-    l3 = work_df[(work_df['diff_days'] >= 3) & (work_df['diff_days'] <= 8) & (work_df['购车回访_3天'] == False)]
-    l15 = work_df[(work_df['diff_days'] >= 15) & (work_df['diff_days'] <= 20) & (work_df['购车回访_15天'] == False)]
-    l360 = work_df[(work_df['diff_days'] >= 360) & (work_df['diff_days'] <= 365) & (work_df['购车回访_30天'] == False)]
-    lbd = work_df[(work_df['bday_diff'] >= 0) & (work_df['bday_diff'] <= 30) & (work_df['生日回访标记'] == False)].sort_values('bday_diff')
+   # --- 筛选任务 (修改后：包含逾期宽限期) ---
+    
+    # 规则1：首次回访 (原 3-8天 -> 改为 3-11天)
+    # 这样第 9,10,11 天的任务依然会留在这里，直到第12天彻底消失
+    l3 = work_df[
+        (work_df['diff_days'] >= 3) & 
+        (work_df['diff_days'] <= 11) &  # <--- 修改了这里，从 8 改为 11
+        (work_df['购车回访_3天'] == False)
+    ]
+
+    # 规则2：二次回访 (原 15-20天 -> 改为 15-23天)
+    l15 = work_df[
+        (work_df['diff_days'] >= 15) & 
+        (work_df['diff_days'] <= 23) &  # <--- 修改了这里，从 20 改为 23
+        (work_df['购车回访_15天'] == False)
+    ]
+
+    # 规则3：周年回访 (原 360-365天 -> 改为 360-368天)
+    l360 = work_df[
+        (work_df['diff_days'] >= 360) & 
+        (work_df['diff_days'] <= 368) & # <--- 修改了这里，从 365 改为 368
+        (work_df['购车回访_30天'] == False)
+    ]
+    
+    # 规则4：生日回访 (原 0~30天 -> 改为 -3~30天)
+    # 包含了过去3天内的生日
+    lbd = work_df[
+        (work_df['bday_diff'] >= -3) &  # <--- 修改了这里，从 0 改为 -3
+        (work_df['bday_diff'] <= 30) & 
+        (work_df['生日回访标记'] == False)
+    ].sort_values('bday_diff')
 
     # --- 逾期监控 ---
     ov_l3 = work_df[(work_df['diff_days'] > 8) & (work_df['diff_days'] <= 11) & (work_df['购车回访_3天'] == False)].assign(原因='首次逾期')
@@ -305,3 +332,4 @@ if not df.empty:
 
 else:
     st.warning("⚠️ 数据加载为空，请检查 Google Sheet 格式或网络连接")
+
